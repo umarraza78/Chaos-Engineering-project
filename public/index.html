@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensus Architecture Demo</title>
+    <style>
+        /* Ivory & Gold Premium Theme */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #FDFBF7; color: #2C3E50; margin: 0; padding: 0; }
+        header { background-color: #FFFFFF; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #EAE1D8; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        h1 { margin: 0; font-size: 24px; letter-spacing: 2px; text-transform: uppercase; }
+        
+        /* Status Badge Styling remains distinct for the presentation */
+        .status-badge { padding: 8px 16px; border-radius: 20px; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; }
+        .status-online { background-color: #004d40; color: #69f0ae; border: 1px solid #69f0ae; }
+        .status-offline { background-color: #b71c1c; color: #ff8a80; border: 1px solid #ff8a80; animation: pulse 1s infinite; }
+        
+        .hero { text-align: center; padding: 60px 20px; }
+        .products { display: flex; justify-content: center; gap: 30px; padding: 20px; flex-wrap: wrap; }
+        
+        /* Updated Product Cards */
+        .product-card { background-color: #FFFFFF; border-radius: 10px; padding: 20px; width: 250px; text-align: center; border: 1px solid #EAE1D8; transition: transform 0.3s, box-shadow 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .product-card:hover { transform: translateY(-5px); border-color: #D4C4B7; box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
+        .bottle { font-size: 60px; margin-bottom: 15px; }
+        
+        /* Gold Buttons */
+        .buy-btn { background-color: #D4AF37; color: #FFFFFF; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 15px; transition: background 0.3s; }
+        .buy-btn:hover { background-color: #B5952F; }
+        .disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Sensus Perfumes</h1>
+        <div id="statusIndicator" class="status-badge status-online">
+            <span id="statusDot">🟢</span>
+            <span id="statusText">API ONLINE (PID: --)</span>
+            <span id="cpuText" style="margin-left:12px; font-weight:600;">CPU: --</span>
+        </div>
+    </header>
+
+    <div class="hero">
+        <h2>Discover Your Signature Scent</h2>
+        <p>Experiencing seamless browsing powered by highly-available infrastructure.</p>
+    </div>
+
+    <div class="products">
+        <div class="product-card">
+            <div class="bottle">🧴</div>
+            <h3>Oud & Wood</h3>
+            <p>$120.00</p>
+            <button class="buy-btn" id="btn1">Add to Cart</button>
+        </div>
+        <div class="product-card">
+            <div class="bottle">✨</div>
+            <div class="product-card-body">
+                <h3>Midnight Amber</h3>
+                <p>$95.00</p>
+                <button class="buy-btn" id="btn2">Add to Cart</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusText = document.getElementById('statusText');
+        const statusDot = document.getElementById('statusDot');
+        const cpuText = document.getElementById('cpuText');
+        const buttons = document.querySelectorAll('.buy-btn');
+
+        async function checkServerHealth() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                
+                const isHealthy = data.status === 'Healthy';
+                statusIndicator.className = `status-badge ${isHealthy ? 'status-online' : 'status-offline'}`;
+                statusText.innerText = `${isHealthy ? 'API ONLINE' : 'API DEGRADED'} (PID: ${data.pid})`;
+                statusDot.innerText = isHealthy ? '🟢' : '🔴';
+                const cpuPercent = isFinite(data.cpuLoad) ? (data.cpuLoad * 100).toFixed(0) : '--';
+                cpuText.innerText = `CPU: ${cpuPercent}%`;
+                buttons.forEach(btn => btn.classList.toggle('disabled', !isHealthy));
+
+            } catch (error) {
+                statusIndicator.className = 'status-badge status-offline';
+                statusText.innerText = 'CRITICAL: API OFFLINE - Reconnecting...';
+                statusDot.innerText = '🔴';
+                cpuText.innerText = 'CPU: --';
+                buttons.forEach(btn => btn.classList.add('disabled'));
+            }
+        }
+
+        setInterval(checkServerHealth, 1500);
+        checkServerHealth();
+    </script>
+</body>
+</html>
