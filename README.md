@@ -1,4 +1,4 @@
-🌪️ Chaos Engineering Devops Project
+🌪️ Chaos Engineering Project(Devops)
 The standout feature of this project is its resilience testing. We didn't just build a site; we tried to break it. Using Steadybit, we orchestrated controlled "attacks" to identify single points of failure.
 
 Experiments Performed:
